@@ -1,9 +1,13 @@
-use std::io::{self, Write};
-
-use clap::{command, Arg, ArgAction, Command};
-
+#![allow(unused)]
+use std::{io::{self, Write}, process::exit};
+use clap::{command, Arg, ArgAction, ArgMatches, Command};
 use crate::config_manager::ConfigManager;
 
+
+#[derive(Debug)]
+pub struct Cli<'a> {
+  pub matches: &'a ArgMatches
+}
 
 pub fn builder() -> Command {
   command!()
@@ -20,7 +24,8 @@ pub fn builder() -> Command {
       Arg::new("add_config")
         .short('a')
         .long("add-config")
-        .action(ArgAction::Append),
+        .action(ArgAction::Append)
+        .help(""),
       Arg::new("remove_config")
         .short('r')
         .long("remove-config")
@@ -65,4 +70,21 @@ pub fn add_config(config_manager: &ConfigManager, host: String) {
 
   config_manager.add_config(&host, hostname.as_str(), user.as_str())
     .expect(format!("Error: Failed to add config {host}").as_str());
+}
+
+pub fn list(config_manager: &ConfigManager) {
+  let hostnames = config_manager.get_hostnames().expect("failed");
+  
+  for host in hostnames {
+    print!("{}\n", host);
+  }
+}
+
+pub fn init_cli(matches: &ArgMatches) {
+  dbg!("init_cli");
+  if matches.args_present() {
+    // Force display of help text
+    builder().print_help().expect("Failed to print help");
+    exit(0);
+  }
 }

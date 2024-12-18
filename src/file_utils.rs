@@ -1,3 +1,5 @@
+#![allow(unused)]
+use std::env;
 use std::fs;
 
 
@@ -7,13 +9,19 @@ fn delete_file(path: &str) -> Result<(), Box<dyn std::error::Error>> {
   return Ok(());
 }
 
-fn get_filename(path: &str) {
-  let split_filepath = path.split("/").collect();
-  return split_filepath[-1];
+pub fn get_default_config_path<'a>() -> String {
+    let home_env = env::var("HOME").unwrap();
+    let default_config_path = home_env + "/.ssh/config";    
+    return default_config_path;
+}
+
+fn get_filename(path: &str) -> &str {
+let split_filepath: Vec<&str> = path.split("/").collect();
+  return *split_filepath.last().unwrap();
 }
 
 fn get_filepath(path: &str) {
-  let split_filepath = path.split("/").collect();
+  let split_filepath: Vec<&str> = path.split("/").collect();
 }
 
 fn rename_file(old: &str, new: &str) -> Result<(), Box<dyn std::error::Error>> {
@@ -21,3 +29,4 @@ fn rename_file(old: &str, new: &str) -> Result<(), Box<dyn std::error::Error>> {
 
   return Ok(());
 }
+

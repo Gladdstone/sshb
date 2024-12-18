@@ -9,10 +9,8 @@ pub struct ConfigManager {
 
 impl ConfigManager {
 
-  const CONFIG: &'static str = "config";
-
   pub fn add_config(&self, host: &str, hostname: &str, user: &str) -> Result<(), Box<dyn std::error::Error>> {
-    let mut file = OpenOptions::new().append(true).open(format!("{}{}", self.ssh_config, Self::CONFIG))?;
+    let mut file = OpenOptions::new().append(true).open(format!("{}", self.ssh_config))?;
 
     file.write_all(("Host ".to_owned() + host +
       "\n	HostName " + hostname +
@@ -23,7 +21,7 @@ impl ConfigManager {
   }
 
   pub fn get_hostnames(&self) -> Result<Vec<String>, Box<dyn std::error::Error>> {
-    let file = File::open(format!("{}{}", self.ssh_config, Self::CONFIG))
+    let file = File::open(format!("{}", self.ssh_config))
       .expect("Error: unable to open config");
     let reader = BufReader::new(file);
 
@@ -42,7 +40,7 @@ impl ConfigManager {
   }
 
   pub fn existing_host(&self, hostname: &str) -> Result<bool, Box<dyn std::error::Error>> {
-    let file = File::open(format!("{}{}", self.ssh_config, Self::CONFIG))?;
+    let file = File::open(format!("{}", self.ssh_config))?;
     let reader = BufReader::new(file);
 
     for line in reader.lines() {
@@ -59,7 +57,7 @@ impl ConfigManager {
   }
 
   pub fn remove_config(&self, host: &str) -> Result<(), Box<dyn std::error::Error>> {
-    let config_file = File::open(format!("{}{}", self.ssh_config, Self::CONFIG))?;
+    let config_file = File::open(format!("{}", self.ssh_config))?;
 
     let temp_config = format!("{}config.tmp", &self.ssh_config);
     let mut temp_file = File::create(temp_config)?;
