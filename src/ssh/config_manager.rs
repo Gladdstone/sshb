@@ -1,5 +1,5 @@
-use std::fs::{File, OpenOptions};
-use std::io::{BufRead, BufReader, Write};
+use std::fs::{File, OpenOptions, rename};
+use std::io::{BufRead, BufReader, Error, Write};
 
 
 #[derive(Debug)]
@@ -14,7 +14,7 @@ impl ConfigManager {
 
     file.write_all(("Host ".to_owned() + host +
       "\n	HostName " + hostname +
-      "\n	User " + user + "\n\n").as_bytes())
+      "	User " + user + "\n").as_bytes())
       .expect("Unable to write data");
 
     Ok(())
@@ -39,6 +39,12 @@ impl ConfigManager {
     return Ok(hostnames);
   }
 
+  /// Opens the configured ssh config, searches for the passed hostname.
+  /// Returns true is hostname is present, false otherwise.
+  ///
+  /// Arguments:
+  ///
+  /// * `hostname`: target hostname or ipaddress
   pub fn existing_host(&self, hostname: &str) -> Result<bool, Box<dyn std::error::Error>> {
     let file = File::open(format!("{}", self.ssh_config))?;
     let reader = BufReader::new(file);
@@ -56,10 +62,10 @@ impl ConfigManager {
     return Ok(false);
   }
 
-  pub fn remove_config(&self, host: &str) -> Result<(), Box<dyn std::error::Error>> {
+  pub fn remove_config(&self, host: &str) -> Result<(), Error> {
     let config_file = File::open(format!("{}", self.ssh_config))?;
 
-    let temp_config = format!("{}config.tmp", &self.ssh_config);
+    let temp_config = &format!("{}.tmp", self.ssh_config);
     let mut temp_file = File::create(temp_config)?;
 
     let reader = BufReader::new(config_file);
@@ -86,7 +92,7 @@ impl ConfigManager {
       }
     }
 
-    Ok(())
+    return rename(temp_config, &self.ssh_config);
   }
 
 }
